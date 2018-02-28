@@ -1,0 +1,33 @@
+# frozen_string_literal: true
+
+require 'sinatra/cyclist'
+require 'dashing'
+
+require 'sequel'
+DBUD = Sequel.connect('postgres://postgres:postgres@localhost/dunbrody')
+
+# Which packhouses to query for data:
+PACKHOUSES_TO_USE = %w[PH2 PH3].freeze
+
+configure do
+  set :auth_token, 'YOUR_AUTH_TOKEN'
+
+  # See http://www.sinatrarb.com/intro.html > Available Template Languages on
+  # how to add additional template languages.
+  set :template_languages, %i[html erb]
+
+  helpers do
+    def protected!
+      # Put any authentication code you want in here.
+      # This method is run before accessing any resource.
+    end
+  end
+end
+
+map Sinatra::Application.assets_prefix do
+  run Sinatra::Application.sprockets
+end
+
+set :routes_to_cycle_through, %i[crates_shift_ph3 rejected_ph3 rejections_ph3 running_hours_ph3]
+
+run Sinatra::Application

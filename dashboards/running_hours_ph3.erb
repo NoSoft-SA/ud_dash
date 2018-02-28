@@ -1,0 +1,16 @@
+<script type='text/javascript'>
+$(function() {
+  Dashing.widget_base_dimensions = [370, 340]
+  Dashing.numColumns = 5
+});
+</script>
+
+<% phc = 'PH3' %>
+<% content_for :title do %>Packhouse <%= phc %> - running hours<% end %>
+<div class="gridster">
+  <ul>
+    <li data-row="1" data-col="1" data-sizex="5" data-sizey="3">
+      <div data-id="runningchart_<%= phc %>" data-view="GoogleColumn" style="background-color:#12b0c5" data-title="Running Hours (Target > 6.75)"></div>
+    </li>
+  </ul>
+</div>

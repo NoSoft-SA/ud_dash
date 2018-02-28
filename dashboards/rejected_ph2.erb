@@ -1,0 +1,16 @@
+<script type='text/javascript'>
+$(function() {
+  Dashing.widget_base_dimensions = [370, 340]
+  Dashing.numColumns = 5
+});
+</script>
+
+<% phc = 'PH2' %>
+<% content_for :title do %>Packhouse <%= phc %> - rejected<% end %>
+<div class="gridster">
+  <ul>
+    <li data-row="1" data-col="1" data-sizex="5" data-sizey="3">
+      <div data-id="rejectchart_<%= phc %>" data-view="GooglePie"  data-title="Rejections per week (Target < 3%)"></div>
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,19 @@
+<script type='text/javascript'>
+$(function() {
+  Dashing.widget_base_dimensions = [370, 340]
+  Dashing.numColumns = 5
+});
+</script>
+
+<% phc = 'PH3' %>
+<% content_for :title do %>Packhouse <%= phc %> - rejected pallets<% end %>
+<div class="gridster">
+  <ul>
+    <li data-row="1" data-col="1" data-sizex="2" data-sizey="3">
+      <div data-id="rejectcounts_<%= phc %>" data-unordered="true" data-view="List" data-moreinfo="Target < 3%" data-title="Counts"></div>
+    </li>
+    <li data-row="1" data-col="1" data-sizex="3" data-sizey="3">
+      <div data-id="rejectmin_<%= phc %>" data-suffix="%" data-view="Meter" data-height="700" data-width="700" data-title="% Rejections per week" data-min="0" data-max="100" data-moreinfo="Target < 3%"></div>
+    </li-->
+  </ul>
+</div>
