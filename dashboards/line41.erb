@@ -1,0 +1,35 @@
+<% line_no = '41' %>
+<div class="gridster">
+  <ul>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="2">
+      <div data-id="line_details_<%= line_no %>" data-view="List" data-unordered="true" data-title="Line <%= line_no %>"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="line_packed_<%= line_no %>" data-view="Meter" data-title="Packed" data-height="200" data-width="200" data-min="0" data-max="100" data-suffix="%"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="line_bins_<%= line_no %>" data-view="List" data-unordered="true" data-title="Bins"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="line_cartons_<%= line_no %>" data-view="Number" data-title="Cartons"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="line_palletizing_<%= line_no %>" data-view="Number" data-title="Palletizing"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-id="line_text-o_<%= line_no %>" data-view="Text" data-title="Rebins" data-text="To go here?"></div>
+    </li>
+
+    <li data-row="1" data-col="1" data-sizex="1" data-sizey="1">
+      <div data-view="Clock"></div>
+      <i class="fa fa-clock-o icon-background"></i>
+    </li>
+
+  </ul>
+</div>

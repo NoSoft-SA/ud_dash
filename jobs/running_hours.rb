@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+# Leave for now...
 query = <<~HTML
   SELECT resources.resource_code AS packhouse_code, shift_types.day_night_or_custom,
   COALESCE(SUM(shifts.running_hours_at_10), 0.0) AS at_10,

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# Extra view: single bar.
+
 day_query = <<~SQL
   SELECT resources.resource_code AS packhouse_code, shift_types.day_night_or_custom,
     SUM(commodities.equivalent_bins * CASE WHEN bins.tipped_date_time <= (date_trunc('day', localtimestamp) + '10:00:00') THEN 1 ELSE 0 END) as count_10am,
@@ -40,7 +42,7 @@ SQL
 
 # :first_in sets how long it takes before the job is first run.
 # In this case, it is run immediately
-SCHEDULER.every '1m', first_in: 0 do
+SCHEDULER.every '5m', first_in: 0 do
   now = Time.now
   daytime = true
   if now.hour > 17
@@ -73,6 +75,12 @@ SCHEDULER.every '1m', first_in: 0 do
                    ['10-00',  rec[:count_10am].to_f, rec[:short_10am].to_f],
                    ['14-00',  rec[:count_14pm].to_f, rec[:short_14pm].to_f],
                    ['17-00',  rec[:count_17pm].to_f, rec[:short_17pm].to_f]
+                 ])
+      # shape per time & adjust title.
+      send_event("crateschart_1_#{phc}",
+                 points: [
+                   %w[Time Crates Short],
+                   ['Crates', rec[:count_17pm].to_f, rec[:short_17pm].to_f]
                  ])
     else
       # send bar with night values

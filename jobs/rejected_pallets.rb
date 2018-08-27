@@ -5,6 +5,10 @@
 # The query returns a line per packhouse. Set the packhouses of interest in
 # the constant "PACKHOUSES_TO_USE".
 
+# Counts: Pallets
+# not inspe
+# not %
+# exclude half-pallets (build_status)
 query = <<~SQL
   SELECT packhouse_code, SUM(pallet_count) AS pallets_packed, SUM(passed_count) AS passed, SUM(rejected_count) AS rejected,
   (SUM(rejected_count)::numeric / (SUM(passed_count)::numeric + SUM(rejected_count)::numeric) * 100.00)::integer AS percent_rejected
@@ -13,6 +17,7 @@ query = <<~SQL
     1 AS pallet_count, resources.resource_code AS packhouse_code,
     CASE ppecb_inspections.passed WHEN true THEN 1 ELSE 0 END AS passed_count,
     CASE ppecb_inspections.passed WHEN true THEN 0 ELSE 1 END AS rejected_count
+    -- not-inspected
   FROM pallet_sequences
   LEFT OUTER JOIN pallets ON pallets.id = pallet_sequences.pallet_id
   LEFT OUTER JOIN ppecb_inspections ON ppecb_inspections.id = pallets.ppecb_inspection_id
