@@ -58,15 +58,38 @@ SCHEDULER.every '5m', first_in: 0 do
             .gsub('pre-midnight', "#{prev.year}-#{prev.month}-#{prev.day} 00:00:00")
             .gsub('post-midnight', "#{now.year}-#{now.month}-#{now.day} 00:00:00")
   else
-    # query = day_query
-    # FOR TESTING:
-    query = day_query.gsub('localtimestamp', "'2017-10-12 14:00:00'::timestamp")
+    if ENV['TEST_DASH']
+      # FOR TESTING:
+      query = day_query.gsub('localtimestamp', "'2018-07-10 11:00:00'::timestamp")
+    else
+      query = day_query
+    end
   end
   res = DBUD[query].all
 
+  time_edge = case now.hour * 60 + now.min
+              when 301..600
+                '10am'
+              when 601..840
+                '14pm'
+              when 841..1020
+                '17pm'
+              when 1021..1260
+                '21pm'
+              when 1261..1440
+                '0020am'
+              when 0..20 # Same as above
+                '0020am'
+              when 21..300
+                '3am'
+              end
+  single_count = "count_#{time_edge}".to_sym
+  single_short = "short_#{time_edge}".to_sym
+  ph_used = []
   res.each do |rec|
     phc = rec[:packhouse_code]
     next unless PACKHOUSES_TO_USE.include?(phc)
+    ph_used << phc
     if daytime
       # send bar with day values
       send_event("crateschart_#{phc}",
@@ -75,12 +98,6 @@ SCHEDULER.every '5m', first_in: 0 do
                    ['10-00',  rec[:count_10am].to_f, rec[:short_10am].to_f],
                    ['14-00',  rec[:count_14pm].to_f, rec[:short_14pm].to_f],
                    ['17-00',  rec[:count_17pm].to_f, rec[:short_17pm].to_f]
-                 ])
-      # shape per time & adjust title.
-      send_event("crateschart_1_#{phc}",
-                 points: [
-                   %w[Time Crates Short],
-                   ['Crates', rec[:count_17pm].to_f, rec[:short_17pm].to_f]
                  ])
     else
       # send bar with night values
@@ -92,5 +109,29 @@ SCHEDULER.every '5m', first_in: 0 do
                    ['03-00',  rec[:count_3am].to_f, rec[:short_3am].to_f]
                  ])
     end
+
+    # send bar with values of just the current shift
+    send_event("crateschart_1_#{phc}",
+               points: [
+                 %w[Packed Crates Short],
+                 ['This Shift', rec[single_count].to_f, rec[single_short].to_f]
+               ])
+  end
+
+  # Make sure the dashboard is updated with zero-values
+  # if there is no data for a packhouse:
+  (PACKHOUSES_TO_USE - ph_used).each do |phc|
+    send_event("crateschart_#{phc}",
+               points: [
+                 %w[Time Crates Short],
+                 ['10-00',  0.0, 0.0],
+                 ['14-00',  0.0, 0.0],
+                 ['17-00',  0.0, 0.0]
+               ])
+    send_event("crateschart_1_#{phc}",
+               points: [
+                 %w[Packed Crates Short],
+                 ['This Shift', 0.0, 0.0]
+               ])
   end
 end
