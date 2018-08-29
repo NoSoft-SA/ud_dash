@@ -6,13 +6,12 @@ require 'dashing'
 require 'sequel'
 # TODO: use config for connection string.
 DBUD = Sequel.connect('postgres://postgres:postgres@localhost/dunbrody')
-# DBKR = Sequel.connect('postgres://postgres:postgres@localhost/kromco')
 
 # Which packhouses to query for data:
 PACKHOUSES_TO_USE = %w[PH2 PH3].freeze
 
 configure do
-  set :auth_token, 'YOUR_AUTH_TOKEN'
+  set :auth_token, 'UD_DASH_TOKEN'
 
   # THIS IS HERE so that we can load the dashboard in an iframe...
   set :protection, except: :frame_options

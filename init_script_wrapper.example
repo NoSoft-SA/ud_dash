@@ -1,0 +1,4 @@
+#!/bin/bash
+source /usr/local/share/chruby/chruby.sh && \
+chruby ruby-2.5.0 && \
+smashing "$@"
