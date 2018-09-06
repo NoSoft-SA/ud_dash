@@ -9,24 +9,27 @@
 condition = ENV['TEST_DASH'] ? '28' : 'extract(week FROM current_date)'
 
 query = <<~SQL
-  SELECT packhouse_code, SUM(pallet_count) AS pallets_packed, SUM(passed_count) AS passed, SUM(rejected_count) AS rejected,
-  SUM(not_inspected_count) AS not_inspected,
-  (SUM(rejected_count)::numeric / (SUM(passed_count)::numeric + SUM(rejected_count)::numeric) * 100.00)::integer AS percent_rejected
+  SELECT packhouse_code, SUM(pallet_count) AS pallets_packed, SUM(passed_count) AS passed,
+  SUM(rejected_count) AS rejected, SUM(not_inspected_count) AS not_inspected,
+  (SUM(rejected_count)::numeric / (SUM(passed_count)::numeric + SUM(rejected_count)::numeric + SUM(not_inspected_count)::numeric) * 100.00)::integer AS percent_rejected
   FROM (
-  SELECT distinct on (coalesce(pallet_sequences.pallet_number, pallet_sequences.scrapped_pallet_number))
-    1 AS pallet_count, resources.resource_code AS packhouse_code,
-    CASE ppecb_inspections.passed WHEN true THEN 1 ELSE 0 END AS passed_count,
-    CASE ppecb_inspections.passed WHEN true THEN 0 ELSE 1 END AS rejected_count,
-    CASE ppecb_inspection_id WHEN NULL THEN 1 ELSE 0 END AS not_inspected_count
-  FROM pallet_sequences
-  LEFT OUTER JOIN pallets ON pallets.id = pallet_sequences.pallet_id
-  LEFT OUTER JOIN ppecb_inspections ON ppecb_inspections.id = pallets.ppecb_inspection_id
-  JOIN production_runs ON production_runs.id = pallet_sequences.production_run_id
-  JOIN resources ON resources.id = production_runs.packhouse_resource_id
-  WHERE extract(week FROM pallet_sequences.packed_date_time) = #{condition}
+  SELECT DISTINCT ON (COALESCE(pallet_sequences.pallet_number, pallet_sequences.scrapped_pallet_number))
+      1 AS pallet_count,
+      CASE pallets.qc_result_status WHEN 'PASSED' THEN 1 ELSE 0 END AS passed_count,
+      CASE pallets.qc_result_status WHEN 'FAILED' THEN 1 ELSE 0 END AS rejected_count,
+      CASE pallets.ppecb_inspection_id IS NULL WHEN true THEN 1 ELSE 0 END AS not_inspected_count,
+      resources.resource_code AS packhouse_code
+     FROM pallets
+       JOIN pallet_sequences ON COALESCE(pallet_sequences.pallet_number, pallet_sequences.scrapped_pallet_number) = pallets.pallet_number
+       JOIN production_runs ON production_runs.id = pallet_sequences.production_run_id
+       JOIN resources ON resources.id = production_runs.packhouse_resource_id
+    JOIN fg_products ON fg_products.id = pallet_sequences.fg_product_id
+    WHERE extract(week FROM pallet_sequences.packed_date_time) = #{condition}
     AND pallets.build_status = 'FULL'
-  ) sub
+    ORDER BY COALESCE(pallet_sequences.pallet_number, pallet_sequences.scrapped_pallet_number), pallet_sequences.pallet_sequence_number
+    ) sub
   GROUP BY packhouse_code
+  ORDER BY packhouse_code;
 SQL
 
 empty_list = [
